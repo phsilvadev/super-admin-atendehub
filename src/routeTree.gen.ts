@@ -10,33 +10,141 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuditoriaRouteImport } from './routes/auditoria'
+import { Route as BaseConhecimentoRouteImport } from './routes/base-conhecimento'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as ConsumoIaRouteImport } from './routes/consumo-ia'
+import { Route as DesignSystemRouteImport } from './routes/design-system'
+import { Route as EmpresasRouteImport } from './routes/empresas'
+import { Route as ImportacoesRouteImport } from './routes/importacoes'
+import { Route as PlanosRouteImport } from './routes/planos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuditoriaRoute = AuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BaseConhecimentoRoute = BaseConhecimentoRouteImport.update({
+  id: '/base-conhecimento',
+  path: '/base-conhecimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsumoIaRoute = ConsumoIaRouteImport.update({
+  id: '/consumo-ia',
+  path: '/consumo-ia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesignSystemRoute = DesignSystemRouteImport.update({
+  id: '/design-system',
+  path: '/design-system',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpresasRoute = EmpresasRouteImport.update({
+  id: '/empresas',
+  path: '/empresas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportacoesRoute = ImportacoesRouteImport.update({
+  id: '/importacoes',
+  path: '/importacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanosRoute = PlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auditoria': typeof AuditoriaRoute
+  '/base-conhecimento': typeof BaseConhecimentoRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/consumo-ia': typeof ConsumoIaRoute
+  '/design-system': typeof DesignSystemRoute
+  '/empresas': typeof EmpresasRoute
+  '/importacoes': typeof ImportacoesRoute
+  '/planos': typeof PlanosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auditoria': typeof AuditoriaRoute
+  '/base-conhecimento': typeof BaseConhecimentoRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/consumo-ia': typeof ConsumoIaRoute
+  '/design-system': typeof DesignSystemRoute
+  '/empresas': typeof EmpresasRoute
+  '/importacoes': typeof ImportacoesRoute
+  '/planos': typeof PlanosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auditoria': typeof AuditoriaRoute
+  '/base-conhecimento': typeof BaseConhecimentoRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/consumo-ia': typeof ConsumoIaRoute
+  '/design-system': typeof DesignSystemRoute
+  '/empresas': typeof EmpresasRoute
+  '/importacoes': typeof ImportacoesRoute
+  '/planos': typeof PlanosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auditoria'
+    | '/base-conhecimento'
+    | '/configuracoes'
+    | '/consumo-ia'
+    | '/design-system'
+    | '/empresas'
+    | '/importacoes'
+    | '/planos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auditoria'
+    | '/base-conhecimento'
+    | '/configuracoes'
+    | '/consumo-ia'
+    | '/design-system'
+    | '/empresas'
+    | '/importacoes'
+    | '/planos'
+  id:
+    | '__root__'
+    | '/'
+    | '/auditoria'
+    | '/base-conhecimento'
+    | '/configuracoes'
+    | '/consumo-ia'
+    | '/design-system'
+    | '/empresas'
+    | '/importacoes'
+    | '/planos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuditoriaRoute: typeof AuditoriaRoute
+  BaseConhecimentoRoute: typeof BaseConhecimentoRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
+  ConsumoIaRoute: typeof ConsumoIaRoute
+  DesignSystemRoute: typeof DesignSystemRoute
+  EmpresasRoute: typeof EmpresasRoute
+  ImportacoesRoute: typeof ImportacoesRoute
+  PlanosRoute: typeof PlanosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +156,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auditoria': {
+      id: '/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AuditoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/base-conhecimento': {
+      id: '/base-conhecimento'
+      path: '/base-conhecimento'
+      fullPath: '/base-conhecimento'
+      preLoaderRoute: typeof BaseConhecimentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consumo-ia': {
+      id: '/consumo-ia'
+      path: '/consumo-ia'
+      fullPath: '/consumo-ia'
+      preLoaderRoute: typeof ConsumoIaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/design-system': {
+      id: '/design-system'
+      path: '/design-system'
+      fullPath: '/design-system'
+      preLoaderRoute: typeof DesignSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empresas': {
+      id: '/empresas'
+      path: '/empresas'
+      fullPath: '/empresas'
+      preLoaderRoute: typeof EmpresasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/importacoes': {
+      id: '/importacoes'
+      path: '/importacoes'
+      fullPath: '/importacoes'
+      preLoaderRoute: typeof ImportacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planos': {
+      id: '/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof PlanosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuditoriaRoute: AuditoriaRoute,
+  BaseConhecimentoRoute: BaseConhecimentoRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
+  ConsumoIaRoute: ConsumoIaRoute,
+  DesignSystemRoute: DesignSystemRoute,
+  EmpresasRoute: EmpresasRoute,
+  ImportacoesRoute: ImportacoesRoute,
+  PlanosRoute: PlanosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
