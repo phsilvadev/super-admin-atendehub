@@ -4,16 +4,23 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AntiBotChallenge, type AntiBotState } from "./anti-bot";
 import { api } from "@/lib/api/client";
 import { identitySchema } from "@/lib/auth/contracts";
 export function LoginForm() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [challenge, setChallenge] = useState<AntiBotState>({
+    ready: false,
+    enabled: true,
+    token: "",
+  });
+  const [challengeReset, setChallengeReset] = useState(0);
   const [visible, setVisible] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy) return;
+    if (busy || !challenge.ready) return;
     const form = new FormData(event.currentTarget);
     setBusy(true);
     setError("");
@@ -22,6 +29,7 @@ export function LoginForm() {
         await api("auth/login", {
           email: String(form.get("email") ?? "").trim(),
           password: String(form.get("password") ?? ""),
+          ...(challenge.token ? { challenge_token: challenge.token } : {}),
         }),
       );
       router.replace("/empresas");
@@ -29,6 +37,11 @@ export function LoginForm() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível entrar.");
       setBusy(false);
+    } finally {
+      if (challenge.enabled) {
+        setChallenge({ ready: false, enabled: true, token: "" });
+        setChallengeReset((value) => value + 1);
+      }
     }
   }
   return (
@@ -87,6 +100,12 @@ export function LoginForm() {
             </div>
           </div>
         </fieldset>
+        <AntiBotChallenge
+          action="platform_login"
+          configPath="/api/platform/auth/challenge"
+          resetKey={challengeReset}
+          onState={setChallenge}
+        />
         {error && (
           <p
             role="alert"
@@ -95,7 +114,11 @@ export function LoginForm() {
             {error}
           </p>
         )}
-        <Button disabled={busy} className="h-12 w-full rounded-xl" type="submit">
+        <Button
+          disabled={busy || !challenge.ready}
+          className="h-12 w-full rounded-xl"
+          type="submit"
+        >
           {busy ? (
             <>
               <Loader2 className="size-4 animate-spin" />

@@ -62,3 +62,12 @@ BACKEND_SOURCE_DIR=/workspace/atend-hub-backend-ZHNER7 PLAYWRIGHT_CHROMIUM_EXECU
 E2E usa FastAPI real, migrations, plano seed e superadmin de teste em SQLite temporário nas portas 8400/3400; não usa o banco local nem cria credenciais reais. Capturas geradas em test-results usam dados exclusivamente de teste. Cobertura: login/logout, isolamento de identidades, sessão expirada/forjada/revogada, origem, restrição de rotas/métodos, busca, filtros, erro e mobile. Testes unitários verificam também falha fechada quando a API está indisponível.
 
 Histórico Lovable preservado; alterações na branch development, sem reescrever main. Consulte CHECKLIST.md e ARCHITECTURE.md.
+
+### Verificação antirrobô
+Os formulários públicos de autenticação usam Cloudflare Turnstile; a API valida o token antes de criar sessões/empresas. A configuração pública é carregada em runtime pelo BFF; nenhuma chave secreta fica neste frontend. Tokens expiram e são renovados após cada tentativa. Falha de script/configuração não libera envio. O backend possui instruções completas em `docs/ANTIBOT.md`; modo de teste local não deve ser publicado.
+
+Teste de navegador com widget/Siteverify oficiais e chaves públicas de teste:
+```bash
+BACKEND_SOURCE_DIR=../Atend-hub-backend E2E_TURNSTILE_TEST=1 npm run test:e2e -- e2e/turnstile.spec.ts
+```
+Produção no Railway depende de chaves reais, hostnames, HTTPS/APP_ORIGIN e backend PostgreSQL validados.

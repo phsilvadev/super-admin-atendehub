@@ -4,6 +4,7 @@ import { PLATFORM_COOKIE } from "@/lib/auth/contracts";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const allowed: Record<string, string[]> = {
+  "auth/challenge": ["GET"],
   "auth/login": ["POST"],
   "auth/logout": ["POST"],
   "auth/me": ["GET"],
