@@ -71,3 +71,5 @@ Teste de navegador com widget/Siteverify oficiais e chaves públicas de teste:
 BACKEND_SOURCE_DIR=../Atend-hub-backend E2E_TURNSTILE_TEST=1 npm run test:e2e -- e2e/turnstile.spec.ts
 ```
 Produção no Railway depende de chaves reais, hostnames, HTTPS/APP_ORIGIN e backend PostgreSQL validados.
+
+Publicado em https://superadmin-production-3d47.up.railway.app/login. Deploy direto pelo CLI autenticado na conta com créditos; atualizar com railway up apontando explicitamente projeto/ambiente/serviço. Instruções/IDs em docs/RAILWAY.md do backend. Autodeploy GitHub ainda não vinculado. Turnstile de produção exige confirmação humana.

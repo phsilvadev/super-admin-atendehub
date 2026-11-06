@@ -31,3 +31,12 @@ Validação antirrobô: 138 Pytest, 109 Vitest do cliente e 15 do superadmin apr
 Preparação Railway: projeto privado AtendeHub criado, ambiente production e serviços vazios api/cliente/superadmin com domínios reservados. Ainda sem fonte/deployment; banco/variáveis de produção e chaves Turnstile reais pendentes. Endereços de cliente/superadmin informados para cadastro no widget. Plano técnico em docs/RAILWAY.md do backend.
 
 Preparação Railway atualizada: chaves reais do Turnstile exclusivas do backend, APP_ORIGIN HTTPS, BACKEND_URL pela rede privada, porta PORT e railway.toml/.railwayignore configurados. PostgreSQL com volume e deployment SUCCESS. Publicação deste frontend pendente: Railway informa User does not have access to the repo mesmo após conectar a conta; aguardando permissão da instalação GitHub. Nenhuma aplicação foi declarada publicada.
+
+### Publicação concluída via CLI
+- [x] Autenticar a conta com créditos e publicar o código local no serviço existente.
+- [x] Observar status SUCCESS e HTTP 200 no login/configuração antirrobô.
+- [x] Gerar prints desktop/mobile de produção e validar ausência de overflow.
+- [ ] Validar login real com confirmação humana do Turnstile (widget interativo renderizado).
+- [ ] Habilitar autodeploy GitHub se/quando a autorização de fonte estiver disponível.
+
+Publicado em https://superadmin-production-3d47.up.railway.app/login; API pela rede privada, Turnstile real ativado sem modo dummy. Login sem token e origem não autorizada foram recusados. Upload direto não depende do GitHub e novos pushes não publicam automaticamente. Não foram criados usuários comerciais fictícios.
