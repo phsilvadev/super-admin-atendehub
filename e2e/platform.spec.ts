@@ -94,6 +94,12 @@ test("superadmin autentica com API real e consulta empresas sem acesso de tenant
     ).status(),
   ).toBe(401);
   await page.getByRole("heading", { name: "Bem-vindo de volta", exact: true }).waitFor();
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  const loginBounds = await page.locator("main > div").first().boundingBox();
+  expect(loginBounds?.x).toBe(0);
+  expect(loginBounds?.y).toBe(0);
+  expect(loginBounds?.width).toBe(await page.evaluate(() => document.documentElement.clientWidth));
+
   await page.screenshot({
     path: test.info().outputPath("superadmin-login-desktop.png"),
     fullPage: true,

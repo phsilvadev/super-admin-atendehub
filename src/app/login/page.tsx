@@ -14,8 +14,8 @@ export default async function LoginPage() {
   const session = await readSession((await cookies()).get(PLATFORM_COOKIE)?.value);
   if (session.status === "authenticated") redirect("/empresas");
   return (
-    <main className="min-h-svh bg-sidebar p-2 sm:p-4">
-      <div className="mx-auto grid min-h-[calc(100svh-1rem)] max-w-[1600px] overflow-hidden rounded-[28px] bg-card p-1.5 sm:min-h-[calc(100svh-2rem)] sm:rounded-[32px] sm:p-2 lg:grid-cols-[1.12fr_1fr]">
+    <main className="min-h-svh bg-card">
+      <div className="grid min-h-svh w-full overflow-hidden bg-card lg:grid-cols-[1.12fr_1fr]">
         <aside
           className="relative hidden flex-col justify-between overflow-hidden rounded-[26px] bg-sidebar p-9 text-sidebar-foreground lg:flex xl:p-12"
           style={{

@@ -45,3 +45,9 @@ Publicado em https://superadmin-production-3d47.up.railway.app/login; API pela r
 - [x] Aplicar composição em moldura arredondada, painel visual e formulário; preservar cores/tokens, autenticação e Turnstile; sem login social; gerar prints e validar.
 
 Validação em 09/11/2026: build/TypeScript, ESLint dos arquivos alterados, 15 Vitest e dois E2E existentes aprovados (autenticação/isolamento com API/SQLite reais e desafio Cloudflare com chaves oficiais de teste). Prints desktop/mobile gerados. Tokens de cores globais e contratos de autenticação preservados; sem botão Google/cadastro público. Alteração local, sem push ou publicação.
+
+### Correção de largura do acesso
+- [x] Remover fundo/margem escuros e limite de largura no login, ocupar janela completa; validar localmente.
+- [ ] Publicar a correção de largura no Railway e confirmar no navegador.
+
+Build/TypeScript e E2E de autenticação/isolamento aprovados em 1920x1080; bounding box do container confirmada em x=0/y=0 e largura igual à área útil da janela. Mantidas as cores do painel e o Turnstile.
