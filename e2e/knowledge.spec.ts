@@ -7,6 +7,10 @@ test("biblioteca real: importar, revisar, publicar, editar com conflito e desati
   browser,
 }) => {
   await page.goto("/base-conhecimento");
+  await expect(page.getByRole("region", { name: "Resumo da biblioteca" })).toHaveCount(0);
+  await expect(
+    page.getByRole("navigation").getByRole("link", { name: "Importações", exact: true }),
+  ).toHaveCount(0);
   await expect(page).toHaveURL(/\/login$/);
   expect((await context.request.get(base)).status()).toBe(401);
   await page.getByLabel("E-mail", { exact: true }).fill("platform@example.com");
@@ -42,7 +46,7 @@ test("biblioteca real: importar, revisar, publicar, editar com conflito e desati
     mimeType: "application/json",
     buffer: Buffer.from("{"),
   });
-  await expect(page.getByRole("alert").filter({hasText:"JSON inválido"})).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "JSON inválido" })).toBeVisible();
   await upload.setInputFiles({
     name: "conversas.json",
     mimeType: "application/json",
@@ -150,7 +154,9 @@ test("biblioteca real: importar, revisar, publicar, editar com conflito e desati
     route.fulfill({ status: 503, json: { detail: "Biblioteca indisponível para teste." } }),
   );
   await page.getByRole("button", { name: "Atualizar biblioteca", exact: true }).click();
-  await expect(page.getByRole("alert").filter({hasText:"Biblioteca indisponível"})).toBeVisible();
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Biblioteca indisponível" }),
+  ).toBeVisible();
   await page.unroute("**/api/platform/knowledge?**");
   await page.getByRole("button", { name: "Tentar novamente", exact: true }).click();
   await expect(page.getByRole("button", { name: entry.title, exact: true })).toBeVisible();
@@ -166,6 +172,7 @@ test("biblioteca real: importar, revisar, publicar, editar com conflito e desati
   expect(bounds!.height).toBeLessThanOrEqual(844);
   await dialog.getByRole("button", { name: "Fechar", exact: true }).click();
   await page.goto("/importacoes");
+  await expect(page).toHaveURL(/\/base-conhecimento\?tab=imports$/);
   await expect(
     page.getByRole("heading", { name: "Importar conversas", exact: true }),
   ).toBeVisible();

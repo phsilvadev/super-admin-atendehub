@@ -11,7 +11,6 @@ import {
   Layers,
   Cpu,
   BookOpen,
-  Upload,
   ShieldCheck,
   Settings,
   Boxes,
@@ -25,7 +24,6 @@ export const navItems = [
   { to: "/planos", label: "Planos", icon: Layers },
   { to: "/consumo-ia", label: "Consumo de IA", icon: Cpu },
   { to: "/base-conhecimento", label: "Base de conhecimento", icon: BookOpen },
-  { to: "/importacoes", label: "Importações", icon: Upload },
   { to: "/auditoria", label: "Auditoria", icon: ShieldCheck },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
 ] as const;

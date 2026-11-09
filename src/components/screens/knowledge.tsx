@@ -11,7 +11,6 @@ import {
   Upload,
   ClipboardCheck,
   ArrowUpRight,
-  Archive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -309,28 +308,6 @@ export function KnowledgeScreen({ initialTab = "library" }: { initialTab?: strin
           Novo conteúdo
         </Button>
       </header>
-      <section aria-label="Resumo da biblioteca" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        {(
-          [
-            ["total", "Conteúdos na biblioteca", BookOpen],
-            ["published", "Publicados", FileText],
-            ["review", "A revisar", ClipboardCheck],
-            ["inactive", "Desativados", Archive],
-          ] as const
-        ).map(([key, label, Icon]) => (
-          <div key={key} className="rounded-2xl border bg-card p-4 shadow-card sm:p-5">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-xs text-muted-foreground">{label}</p>
-              <Icon className="size-4 shrink-0 text-muted-foreground" />
-            </div>
-            {loading && !data ? (
-              <Skeleton className="mt-4 h-8 w-12" />
-            ) : (
-              <p className="mt-3 text-3xl font-semibold">{data?.summary[key] ?? "—"}</p>
-            )}
-          </div>
-        ))}
-      </section>
       <Tabs value={tab} onValueChange={changeTab}>
         <TabsList className="h-auto max-w-full gap-1 bg-transparent p-0">
           <TabsTrigger value="library" className="gap-2 px-3 py-2.5">

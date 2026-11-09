@@ -61,3 +61,6 @@ Publicado no Railway: ffa90106-3b32-481b-be3a-b4659925a1a8 em SUCCESS. Commit c8
 - [x] Biblioteca conectada, importação JSON autorizada, revisão/publicação/desativação com versões; filtros/paginação no servidor, skeletons, erro/retry e conflitos. Build/TypeScript, lint, 20 Vitest e E2E de ponta a ponta com API/SQLite reais aprovados; regressão de autenticação/isolamento aprovada. Prints desktop/mobile gerados com dados apenas de teste.
 
 Publicado: commit 3038bb6, Railway 41c70529-adb5-4fa7-9aaf-83b774eae8fd em SUCCESS; API 5d179377-5388-4089-a744-def48bc8441f em SUCCESS. Prints mostram o fluxo com API real e SQLite temporário, sem dados demonstrativos inseridos na produção. TXT/PDF e consulta por IA continuam pendentes.
+
+### Simplificação da base de conhecimento
+- [x] Remover indicadores e entrada duplicada Importações do menu lateral; manter a aba interna e redirecionar a URL antiga para /base-conhecimento?tab=imports. Build/TypeScript, lint e E2E do fluxo completo aprovados; prints desktop/mobile atualizados.
