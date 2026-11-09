@@ -40,3 +40,8 @@ Preparação Railway atualizada: chaves reais do Turnstile exclusivas do backend
 - [ ] Habilitar autodeploy GitHub se/quando a autorização de fonte estiver disponível.
 
 Publicado em https://superadmin-production-3d47.up.railway.app/login; API pela rede privada, Turnstile real ativado sem modo dummy. Login sem token e origem não autorizada foram recusados. Upload direto não depende do GitHub e novos pushes não publicam automaticamente. Não foram criados usuários comerciais fictícios.
+
+### Login conforme referência visual
+- [x] Aplicar composição em moldura arredondada, painel visual e formulário; preservar cores/tokens, autenticação e Turnstile; sem login social; gerar prints e validar.
+
+Validação em 09/11/2026: build/TypeScript, ESLint dos arquivos alterados, 15 Vitest e dois E2E existentes aprovados (autenticação/isolamento com API/SQLite reais e desafio Cloudflare com chaves oficiais de teste). Prints desktop/mobile gerados. Tokens de cores globais e contratos de autenticação preservados; sem botão Google/cadastro público. Alteração local, sem push ou publicação.

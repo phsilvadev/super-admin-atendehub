@@ -1,7 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Eye, EyeOff, ShieldCheck, Loader2 } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AntiBotChallenge, type AntiBotState } from "./anti-bot";
@@ -46,20 +46,21 @@ export function LoginForm() {
   }
   return (
     <div className="mx-auto w-full max-w-sm">
-      <span className="mb-7 grid size-12 place-items-center rounded-2xl bg-accent/40 text-brand">
-        <ShieldCheck className="size-6" />
-      </span>
-      <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-        Acesso à plataforma
-      </p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight">Bem-vindo de volta</h1>
-      <p className="mt-3 text-sm leading-6 text-muted-foreground">
-        Entre para gerenciar as empresas e acompanhar a operação do AtendeHub.
-      </p>
+      <div className="text-center">
+        <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-[10px] font-medium text-muted-foreground">
+          <LockKeyhole className="size-3" />
+          Acesso à plataforma
+        </span>
+        <h1 className="text-[28px] font-semibold tracking-tight">Bem-vindo de volta</h1>
+        <p className="mx-auto mt-3 max-w-xs text-sm leading-6 text-muted-foreground">
+          Entre com sua conta para acessar
+          <br className="hidden sm:block" /> a administração do AtendeHub.
+        </p>
+      </div>
       <form onSubmit={submit} className="mt-8 space-y-5">
         <fieldset disabled={busy} className="space-y-5">
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
+            <label htmlFor="email" className="text-xs font-medium">
               E-mail
             </label>
             <Input
@@ -70,11 +71,11 @@ export function LoginForm() {
               required
               maxLength={254}
               placeholder="voce@empresa.com.br"
-              className="h-12 rounded-xl bg-card"
+              className="h-12 rounded-xl border-transparent bg-secondary/70 shadow-none focus-visible:border-ring"
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
+            <label htmlFor="password" className="text-xs font-medium">
               Senha
             </label>
             <div className="relative">
@@ -85,7 +86,7 @@ export function LoginForm() {
                 autoComplete="current-password"
                 required
                 maxLength={128}
-                className="h-12 rounded-xl bg-card pr-12"
+                className="h-12 rounded-xl border-transparent bg-secondary/70 pr-12 shadow-none focus-visible:border-ring"
                 placeholder="Digite sua senha"
               />
               <button
@@ -132,10 +133,8 @@ export function LoginForm() {
           )}
         </Button>
       </form>
-      <p className="mt-6 text-center text-xs leading-5 text-muted-foreground">
-        Acesso exclusivo à administração da plataforma.
-        <br />
-        Seu acesso é fornecido pelo administrador da plataforma.
+      <p className="mx-auto mt-6 max-w-xs text-center text-[11px] leading-5 text-muted-foreground">
+        Precisa de acesso? Fale com o administrador responsável pela plataforma.
       </p>
     </div>
   );
