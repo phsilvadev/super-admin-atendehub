@@ -53,3 +53,6 @@ Validação em 09/11/2026: build/TypeScript, ESLint dos arquivos alterados, 15 V
 Build/TypeScript e E2E de autenticação/isolamento aprovados em 1920x1080; bounding box do container confirmada em x=0/y=0 e largura igual à área útil da janela. Mantidas as cores do painel e o Turnstile.
 
 Publicado no Railway: ffa90106-3b32-481b-be3a-b4659925a1a8 em SUCCESS. Commit c829998 em origin/development. Confirmação real do navegador em 1920x1080: HTTP 200, container x=0/y=0/largura 1920; cantos externos brancos. Login social ausente, cores atuais preservadas, Turnstile real enabled=true/testing=false. Print de produção gerado sem dados de acesso preenchidos. Trello e layouts concluídos.
+
+### Moldura branca e altura responsiva
+- [x] Recuar somente painel colorido em 8px sobre fundo branco; adaptar alturas/espaçamentos a notebook e manter campos/Turnstile acessíveis. Build, TypeScript e E2E responsivo aprovados: notebook 1366x768, login 1366x650, desktop 1920x1080 e mobile 390x844. Turnstile representado por widget de 65px no teste de geometria, sem envio de autenticação.

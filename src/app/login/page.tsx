@@ -1,3 +1,4 @@
+import styles from "@/components/auth/auth-layout.module.css";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Boxes, Building2, BookOpen, Activity, ArrowUpRight } from "lucide-react";
@@ -14,10 +15,10 @@ export default async function LoginPage() {
   const session = await readSession((await cookies()).get(PLATFORM_COOKIE)?.value);
   if (session.status === "authenticated") redirect("/empresas");
   return (
-    <main className="min-h-svh bg-card">
-      <div className="grid min-h-svh w-full overflow-hidden bg-card lg:grid-cols-[1.12fr_1fr]">
+    <main className="min-h-dvh bg-card">
+      <div className={`${styles["shell"]} bg-card`}>
         <aside
-          className="relative hidden flex-col justify-between overflow-hidden rounded-[26px] bg-sidebar p-9 text-sidebar-foreground lg:flex xl:p-12"
+          className={`${styles["visual"]} relative flex-col justify-between overflow-hidden rounded-[26px] bg-sidebar text-sidebar-foreground`}
           style={{
             backgroundImage:
               "radial-gradient(ellipse at 55% 25%, color-mix(in oklch, var(--brand) 62%, transparent), transparent 64%), radial-gradient(ellipse at 90% 65%, color-mix(in oklch, var(--accent) 35%, transparent), transparent 65%), radial-gradient(ellipse at 0% 100%, color-mix(in oklch, var(--brand) 60%, transparent), transparent 65%)",
@@ -30,12 +31,14 @@ export default async function LoginPage() {
               Superadmin
             </span>
           </div>
-          <div className="relative z-10 mt-32">
+          <div className={`${styles["visualBody"]} relative z-10`}>
             <span className="inline-flex items-center gap-2 rounded-full border border-sidebar-foreground/15 bg-sidebar-foreground/10 px-3 py-1.5 text-xs">
               <span className="size-1.5 rounded-full bg-accent" />
               Sua plataforma, por inteiro
             </span>
-            <h2 className="mt-5 max-w-xl text-[clamp(2.5rem,3.6vw,3.75rem)] font-medium leading-[1.08] tracking-[-0.045em]">
+            <h2
+              className={`${styles["headline"]} mt-5 max-w-xl font-medium leading-[1.08] tracking-[-0.045em]`}
+            >
               Tudo conectado.
               <br />
               Você no controle.
@@ -45,11 +48,11 @@ export default async function LoginPage() {
               <br />
               Um só lugar para cuidar de cada detalhe.
             </p>
-            <div className="mt-10 grid grid-cols-3 gap-3">
+            <div className={`${styles["featureGrid"]} grid grid-cols-3 gap-3`}>
               {features.map(({ icon: Icon, title, text }, index) => (
                 <div
                   key={title}
-                  className={`flex min-h-40 flex-col justify-between rounded-2xl border p-4 ${index === 0 ? "border-card bg-card text-card-foreground" : "border-sidebar-foreground/10 bg-sidebar-foreground/10 text-sidebar-foreground"}`}
+                  className={`${styles["feature"]} flex flex-col justify-between rounded-2xl border p-4 ${index === 0 ? "border-card bg-card text-card-foreground" : "border-sidebar-foreground/10 bg-sidebar-foreground/10 text-sidebar-foreground"}`}
                 >
                   <div className="flex items-center justify-between">
                     <span
@@ -77,18 +80,18 @@ export default async function LoginPage() {
             </p>
           </div>
         </aside>
-        <section className="flex min-w-0 flex-col justify-between rounded-[24px] px-5 py-6 sm:px-10 sm:py-8 xl:px-16">
-          <div className="flex items-center gap-2 text-sm font-semibold lg:invisible">
+        <section className={styles["formColumn"]}>
+          <div className={`${styles["mobileBrand"]} text-sm font-semibold`}>
             <Boxes className="size-5 text-brand" />
             AtendeHub
             <span className="ml-auto text-[10px] font-normal uppercase tracking-wider text-muted-foreground">
               Superadmin
             </span>
           </div>
-          <div className="py-10 sm:py-12">
+          <div className={styles["formArea"]}>
             <LoginForm />
           </div>
-          <p className="text-center text-[11px] text-muted-foreground">
+          <p className={`${styles["footer"]} text-center text-[11px] text-muted-foreground`}>
             Ambiente de administração · Acesso restrito
           </p>
         </section>

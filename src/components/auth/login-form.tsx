@@ -46,7 +46,7 @@ export function LoginForm() {
   }
   return (
     <div className="mx-auto w-full max-w-sm">
-      <div className="text-center">
+      <div data-access-heading className="text-center">
         <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-[10px] font-medium text-muted-foreground">
           <LockKeyhole className="size-3" />
           Acesso à plataforma
