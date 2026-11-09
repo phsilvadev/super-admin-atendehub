@@ -56,3 +56,6 @@ Publicado no Railway: ffa90106-3b32-481b-be3a-b4659925a1a8 em SUCCESS. Commit c8
 
 ### Moldura branca e altura responsiva
 - [x] Recuar somente painel colorido em 8px sobre fundo branco; adaptar alturas/espaçamentos a notebook e manter campos/Turnstile acessíveis. Build, TypeScript e E2E responsivo aprovados: notebook 1366x768, login 1366x650, desktop 1920x1080 e mobile 390x844. Turnstile representado por widget de 65px no teste de geometria, sem envio de autenticação.
+
+### Base de conhecimento — implementação
+- [x] Biblioteca conectada, importação JSON autorizada, revisão/publicação/desativação com versões; filtros/paginação no servidor, skeletons, erro/retry e conflitos. Build/TypeScript, lint, 20 Vitest e E2E de ponta a ponta com API/SQLite reais aprovados; regressão de autenticação/isolamento aprovada. Prints desktop/mobile gerados com dados apenas de teste.

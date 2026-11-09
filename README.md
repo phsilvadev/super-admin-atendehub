@@ -77,3 +77,13 @@ Publicado em https://superadmin-production-3d47.up.railway.app/login. Deploy dir
 ### Layout de acesso
 
 Login alinhado à referência visual, mantendo a paleta atual e o Turnstile. Área ocupa toda a janela, sem fundo preto externo nem limite de 1600px. Não há login social no superadmin. Deployment ffa90106-3b32-481b-be3a-b4659925a1a8 confirmado em SUCCESS, com validação desktop de 1920x1080.
+
+## Base de conhecimento
+`/base-conhecimento` tem Biblioteca, Importações e Revisão, integradas ao backend. `/importacoes` abre a aba de importação diretamente. É necessário autenticar com uma conta de superadministrador; sessões das distribuidoras não dão acesso.
+
+- Biblioteca: busca textual em título/texto/fonte, filtros de tipo/categoria/status, paginação e contagens no banco.
+- Conteúdo: criação e edição de texto com categoria/fonte; versões imutáveis, proteção por versão concorrente, publicação após três confirmações e nota de revisão, desativação confirmada.
+- Importação: seleção/arrastar JSON, modelo para download, referência de autorização, termos para remoção, resultado tratado, histórico e atalhos para revisão. De 2 a 200 mensagens, até 3.000 caracteres por mensagem e corpo de até 512 KiB. `messages` contém `role: customer|agent` e `text`. O request_id é reutilizado ao repetir o mesmo envio após falha de rede.
+- Skeletons, estados vazios, erros/retry, sessão expirada e layouts desktop/mobile incluídos. Textos são renderizados como texto, sem HTML executável.
+
+Nenhum conteúdo é publicado automaticamente. A remoção de identificadores é assistida e exige revisão humana. TXT/ZIP do WhatsApp, PDF, políticas privadas de empresas, embeddings e respostas de IA não estão incluídos. Teste integrado: `npx playwright test e2e/knowledge.spec.ts` (API real com SQLite temporário; não executa Docker nem integrações externas).

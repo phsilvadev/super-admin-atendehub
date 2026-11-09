@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/page-placeholder";
+import { KnowledgeScreen } from "@/components/screens/knowledge";
 export const metadata = { title: "Base de conhecimento" };
 export default function Page() {
-  return <PagePlaceholder title="Base de conhecimento" description="Conteúdos da base comum." />;
+  return <KnowledgeScreen />;
 }

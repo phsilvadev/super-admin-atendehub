@@ -6,11 +6,11 @@ export class ApiError extends Error {
     super(message);
   }
 }
-export async function api(path: string, body?: unknown) {
+export async function api(path: string, body?: unknown, method?: "POST" | "PATCH") {
   let response: Response;
   try {
     response = await fetch(`/api/platform/${path}`, {
-      method: body === undefined ? "GET" : "POST",
+      method: body === undefined ? "GET" : (method ?? "POST"),
       credentials: "same-origin",
       cache: "no-store",
       ...(body === undefined

@@ -162,7 +162,7 @@ test("superadmin autentica com API real e consulta empresas sem acesso de tenant
       })
     ).status(),
   ).toBe(404);
-  expect((await context.request.get("/api/platform/knowledge")).status()).toBe(404);
+  expect((await context.request.get("/api/platform/knowledge")).status()).toBe(200);
   const replay = platformCookie.value;
   await page.setViewportSize({ width: 390, height: 844 });
   await expect

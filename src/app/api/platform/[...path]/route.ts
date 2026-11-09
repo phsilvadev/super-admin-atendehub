@@ -10,10 +10,19 @@ const allowed: Record<string, string[]> = {
   "auth/me": ["GET"],
   companies: ["GET"],
 };
+const uuid = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+function methods(resource: string) {
+  if (resource === "knowledge" || resource === "knowledge/imports") return ["GET", "POST"];
+  if (new RegExp(`^knowledge/imports/${uuid}$`).test(resource)) return ["GET"];
+  if (new RegExp(`^knowledge/${uuid}$`).test(resource)) return ["GET", "PATCH"];
+  if (new RegExp(`^knowledge/${uuid}/revisions$`).test(resource)) return ["GET"];
+  if (new RegExp(`^knowledge/${uuid}/(?:publish|deactivate)$`).test(resource)) return ["POST"];
+  return allowed[resource] ?? [];
+}
 async function forward(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
   const resource = path.join("/");
-  if (!allowed[resource]?.includes(request.method))
+  if (!methods(resource).includes(request.method))
     return NextResponse.json({ detail: "Recurso indisponível." }, { status: 404 });
   if (request.method !== "GET") {
     const origin =
@@ -45,7 +54,14 @@ async function forward(request: NextRequest, { params }: { params: Promise<{ pat
           const chunk = await reader.read();
           if (chunk.done) break;
           size += chunk.value.byteLength;
-          if (size > 16384) {
+          if (
+            size >
+            (resource === "knowledge/imports"
+              ? 524288
+              : resource.startsWith("knowledge")
+                ? 131072
+                : 16384)
+          ) {
             await reader.cancel();
             return NextResponse.json({ detail: "Solicitação muito grande." }, { status: 413 });
           }
@@ -55,8 +71,8 @@ async function forward(request: NextRequest, { params }: { params: Promise<{ pat
       headers.set("Content-Type", "application/json");
     }
     const query = new URLSearchParams();
-    if (resource === "companies")
-      for (const key of ["q", "status", "offset", "limit"]) {
+    if (["companies", "knowledge", "knowledge/imports"].includes(resource))
+      for (const key of ["q", "status", "kind", "category", "offset", "limit"]) {
         const value = request.nextUrl.searchParams.get(key);
         if (value !== null) query.set(key, value);
       }
@@ -89,4 +105,4 @@ async function forward(request: NextRequest, { params }: { params: Promise<{ pat
     );
   }
 }
-export { forward as GET, forward as POST };
+export { forward as GET, forward as POST, forward as PATCH };

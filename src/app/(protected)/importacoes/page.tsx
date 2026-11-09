@@ -1,7 +1,5 @@
-import { PagePlaceholder } from "@/components/page-placeholder";
-export const metadata = { title: "Importações" };
+import { KnowledgeScreen } from "@/components/screens/knowledge";
+export const metadata = { title: "Importações da base de conhecimento" };
 export default function Page() {
-  return (
-    <PagePlaceholder title="Importações" description="Histórico de importações de conteúdo." />
-  );
+  return <KnowledgeScreen initialTab="imports" />;
 }
