@@ -48,6 +48,8 @@ Validação em 09/11/2026: build/TypeScript, ESLint dos arquivos alterados, 15 V
 
 ### Correção de largura do acesso
 - [x] Remover fundo/margem escuros e limite de largura no login, ocupar janela completa; validar localmente.
-- [ ] Publicar a correção de largura no Railway e confirmar no navegador.
+- [x] Publicar a correção de largura no Railway e confirmar no navegador.
 
 Build/TypeScript e E2E de autenticação/isolamento aprovados em 1920x1080; bounding box do container confirmada em x=0/y=0 e largura igual à área útil da janela. Mantidas as cores do painel e o Turnstile.
+
+Publicado no Railway: ffa90106-3b32-481b-be3a-b4659925a1a8 em SUCCESS. Commit c829998 em origin/development. Confirmação real do navegador em 1920x1080: HTTP 200, container x=0/y=0/largura 1920; cantos externos brancos. Login social ausente, cores atuais preservadas, Turnstile real enabled=true/testing=false. Print de produção gerado sem dados de acesso preenchidos. Trello e layouts concluídos.

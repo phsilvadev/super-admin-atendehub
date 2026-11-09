@@ -73,3 +73,7 @@ BACKEND_SOURCE_DIR=../Atend-hub-backend E2E_TURNSTILE_TEST=1 npm run test:e2e --
 Produção no Railway depende de chaves reais, hostnames, HTTPS/APP_ORIGIN e backend PostgreSQL validados.
 
 Publicado em https://superadmin-production-3d47.up.railway.app/login. Deploy direto pelo CLI autenticado na conta com créditos; atualizar com railway up apontando explicitamente projeto/ambiente/serviço. Instruções/IDs em docs/RAILWAY.md do backend. Autodeploy GitHub ainda não vinculado. Turnstile de produção exige confirmação humana.
+
+### Layout de acesso
+
+Login alinhado à referência visual, mantendo a paleta atual e o Turnstile. Área ocupa toda a janela, sem fundo preto externo nem limite de 1600px. Não há login social no superadmin. Deployment ffa90106-3b32-481b-be3a-b4659925a1a8 confirmado em SUCCESS, com validação desktop de 1920x1080.
