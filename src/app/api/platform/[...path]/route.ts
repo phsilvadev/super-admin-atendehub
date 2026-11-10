@@ -9,9 +9,12 @@ const allowed: Record<string, string[]> = {
   "auth/logout": ["POST"],
   "auth/me": ["GET"],
   companies: ["GET"],
+  "ai-usage": ["GET"],
+  "ai-usage/prices": ["GET", "POST"],
 };
 const uuid = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 function methods(resource: string) {
+  if (new RegExp(`^ai-usage/prices/${uuid}/apply$`).test(resource)) return ["POST"];
   if (resource === "administrators") return ["GET", "POST"];
   if (new RegExp(`^administrators/${uuid}$`).test(resource)) return ["PATCH"];
   if (resource === "settings/openai") return ["GET", "PATCH"];
@@ -75,8 +78,30 @@ async function forward(request: NextRequest, { params }: { params: Promise<{ pat
       headers.set("Content-Type", "application/json");
     }
     const query = new URLSearchParams();
-    if (["companies", "knowledge", "knowledge/imports", "administrators"].includes(resource))
-      for (const key of ["q", "status", "kind", "category", "offset", "limit"]) {
+    if (
+      [
+        "companies",
+        "knowledge",
+        "knowledge/imports",
+        "administrators",
+        "ai-usage",
+        "ai-usage/prices",
+      ].includes(resource)
+    )
+      for (const key of [
+        "q",
+        "status",
+        "kind",
+        "category",
+        "offset",
+        "limit",
+        "start",
+        "end",
+        "company_id",
+        "user_id",
+        "model",
+        "pricing",
+      ]) {
         const value = request.nextUrl.searchParams.get(key);
         if (value !== null) query.set(key, value);
       }
