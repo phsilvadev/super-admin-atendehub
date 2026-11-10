@@ -8,6 +8,9 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  History,
+  ShieldCheck,
+  ArrowUpRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +30,14 @@ import {
   getImport,
   errorMessage,
 } from "@/lib/api/knowledge";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { formatDate } from "@/lib/api/companies";
 const sample = {
   messages: [
@@ -57,6 +68,7 @@ export function ImportPanel({
   const [reading, setReading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState(0);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState("");
@@ -68,6 +80,7 @@ export function ImportPanel({
   const sequence = useRef(0);
   const retry = useRef<{ signature: string; id: string } | null>(null);
   useEffect(() => {
+    if (!historyOpen) return;
     let alive = true;
     setLoading(true);
     setListError("");
@@ -87,7 +100,7 @@ export function ImportPanel({
     return () => {
       alive = false;
     };
-  }, [offset, revision]);
+  }, [offset, revision, historyOpen]);
   useEffect(() => {
     if (!detailId) return;
     let alive = true;
@@ -178,287 +191,354 @@ export function ImportPanel({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   return (
-    <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-      <section className="rounded-2xl border bg-card p-5 shadow-card sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold">Importar conversas</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Transforme conversas autorizadas em rascunhos.
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={download}>
-            <ArrowDownToLine className="mr-2 size-3.5" />
-            Baixar modelo
-          </Button>
-        </div>
-        <form
-          className="mt-6 space-y-5"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void submit();
-          }}
-        >
-          <fieldset disabled={busy} className="space-y-5">
-            <div
-              onDragOver={(event) => {
-                event.preventDefault();
-                if (!busy) setDragging(true);
-              }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={(event) => {
-                event.preventDefault();
-                setDragging(false);
-                void read(event.dataTransfer.files[0]);
-              }}
-              className={`relative rounded-2xl border border-dashed p-7 text-center transition-colors ${dragging ? "border-brand bg-accent/20" : "bg-muted/20"}`}
-            >
-              <span className="mx-auto grid size-11 place-items-center rounded-xl border bg-card">
-                <FileJson className="size-5 text-muted-foreground" />
-              </span>
-              <p className="mt-3 text-sm font-medium">
-                {reading
-                  ? "Validando arquivo…"
-                  : file
-                    ? file.name
-                    : "Arraste seu arquivo JSON aqui"}
+    <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+      <div className="space-y-6">
+        <section className="overflow-hidden rounded-2xl border bg-card shadow-card">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b px-5 py-5 sm:px-6">
+            <div>
+              <h2 className="text-lg font-semibold">Importar conversas</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Envie o arquivo, informe a origem e encaminhe os conteúdos para revisão.
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {file
-                  ? `${file.messages.length} mensagens validadas`
-                  : "Até 512 KiB · de 2 a 200 mensagens"}
-              </p>
-              <label className="mt-4 inline-flex cursor-pointer rounded-lg border bg-card px-4 py-2 text-sm font-medium focus-within:ring-2 focus-within:ring-ring">
-                {file ? "Trocar arquivo" : "Selecionar arquivo"}
-                <input
-                  aria-label="Arquivo de conversas JSON"
-                  type="file"
-                  accept=".json,application/json"
-                  className="sr-only"
-                  onChange={(event) => {
-                    void read(event.target.files?.[0]);
-                    event.target.value = "";
-                  }}
-                />
-              </label>
             </div>
-            <label className="block space-y-1.5 text-sm">
-              <span>Origem e referência da autorização</span>
-              <Input
-                required
-                minLength={10}
-                maxLength={500}
-                value={reference}
-                onChange={(e) => setReference(e.target.value)}
-                placeholder="Ex.: Arquivo autorizado pelo responsável, registro…"
-              />
-            </label>
-            <label className="block space-y-1.5 text-sm">
-              <span>
-                Identificadores para remover{" "}
-                <span className="text-muted-foreground">(opcional)</span>
-              </span>
-              <textarea
-                rows={3}
-                maxLength={12100}
-                className="w-full rounded-xl border bg-background p-3"
-                value={terms}
-                onChange={(e) => setTerms(e.target.value)}
-                placeholder="Um nome de pessoa, empresa ou identificador por linha"
-              />
-              <span className="block text-xs leading-relaxed text-muted-foreground">
-                A remoção automática é assistida e pode deixar dados pessoais. Confira todos os
-                rascunhos antes de publicar.
-              </span>
-            </label>
-            <label className="flex items-start gap-2.5 text-sm leading-relaxed">
-              <input
-                type="checkbox"
-                className="mt-1 size-4 shrink-0 accent-current"
-                checked={authorized}
-                onChange={(e) => setAuthorized(e.target.checked)}
-              />
-              Confirmo que tenho autorização para usar estas conversas na biblioteca comum da
-              plataforma.
-            </label>
-          </fieldset>
-          {error && (
-            <p
-              role="alert"
-              className="rounded-xl border border-destructive/30 p-3 text-sm text-destructive"
-            >
-              {error}
-            </p>
-          )}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-            <span className="text-xs text-muted-foreground">Nada é publicado automaticamente.</span>
-            <Button
-              type="submit"
-              disabled={!file || !authorized || reference.trim().length < 10 || busy || reading}
-            >
-              <ArrowUpFromLine className="mr-2 size-4" />
-              {busy ? "Importando…" : "Importar e gerar rascunhos"}
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" size="sm" onClick={download}>
+                <ArrowDownToLine className="mr-2 size-3.5" />
+                Baixar modelo
+              </Button>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <History className="mr-2 size-3.5" />
+                  Histórico de importações
+                </Button>
+              </SheetTrigger>
+            </div>
           </div>
-        </form>
-        {result && (
-          <div role="status" className="mt-5 space-y-3 rounded-xl border bg-muted/20 p-4">
-            <p className="flex items-center gap-2 text-sm font-medium">
-              <Check className="size-4 text-brand" />
-              Importação concluída
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {result.candidate_ids.length} rascunho(s) gerado(s) · {result.redactions}{" "}
-              ocorrência(s) removida(s).
-            </p>
-            {!result.candidate_ids.length && (
-              <p className="text-sm">
-                Nenhum par elegível de pergunta e resposta foi encontrado. Trechos com condições
-                comerciais particulares são descartados.
+          <form
+            className=""
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submit();
+            }}
+          >
+            <fieldset
+              disabled={busy}
+              className="grid gap-6 p-5 sm:p-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-8"
+            >
+              <div className="min-w-0">
+                <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+                  <FileJson className="size-4 text-muted-foreground" />
+                  Arquivo de origem
+                </div>
+                <div
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    if (!busy) setDragging(true);
+                  }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    setDragging(false);
+                    void read(event.dataTransfer.files[0]);
+                  }}
+                  className={`relative flex min-h-56 flex-col items-center justify-center rounded-xl border border-dashed px-5 py-6 text-center transition-colors lg:min-h-64 ${dragging ? "border-brand bg-accent/20" : "bg-muted/20"}`}
+                >
+                  <span className="mx-auto grid size-11 place-items-center rounded-xl border bg-card">
+                    <FileJson className="size-5 text-muted-foreground" />
+                  </span>
+                  <p className="mt-3 max-w-full break-words text-sm font-medium">
+                    {reading
+                      ? "Validando arquivo…"
+                      : file
+                        ? file.name
+                        : "Arraste seu arquivo JSON aqui"}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {file
+                      ? `${file.messages.length} mensagens validadas`
+                      : "Até 512 KiB · de 2 a 200 mensagens"}
+                  </p>
+                  <label className="mt-4 inline-flex cursor-pointer rounded-lg border bg-card px-4 py-2 text-sm font-medium focus-within:ring-2 focus-within:ring-ring">
+                    {file ? "Trocar arquivo" : "Selecionar arquivo"}
+                    <input
+                      aria-label="Arquivo de conversas JSON"
+                      type="file"
+                      accept=".json,application/json"
+                      className="sr-only"
+                      onChange={(event) => {
+                        void read(event.target.files?.[0]);
+                        event.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                  Aceitamos conversas no formato do modelo JSON. Arquivos TXT, ZIP e PDF ainda não
+                  são suportados.
+                </p>
+                <details className="mt-3 text-xs text-muted-foreground">
+                  <summary className="cursor-pointer font-medium text-foreground">
+                    Como preparar o arquivo?
+                  </summary>
+                  <p className="mt-2 leading-relaxed">
+                    Use uma lista messages, com role (customer ou agent) e text. Pares consecutivos
+                    de cliente e atendente geram rascunhos. O arquivo de exemplo está disponível em
+                    Baixar modelo.
+                  </p>
+                </details>
+              </div>
+              <div className="min-w-0 space-y-4 lg:border-l lg:pl-8">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <ShieldCheck className="size-4 text-muted-foreground" />
+                  Origem e autorização
+                </div>
+                <label className="block space-y-1.5 text-sm">
+                  <span>Origem e referência da autorização</span>
+                  <Input
+                    required
+                    minLength={10}
+                    maxLength={500}
+                    value={reference}
+                    onChange={(e) => setReference(e.target.value)}
+                    placeholder="Ex.: Arquivo autorizado pelo responsável, registro…"
+                  />
+                </label>
+                <label className="block space-y-1.5 text-sm">
+                  <span>
+                    Identificadores para remover{" "}
+                    <span className="text-muted-foreground">(opcional)</span>
+                  </span>
+                  <textarea
+                    rows={2}
+                    maxLength={12100}
+                    className="w-full resize-y rounded-xl border bg-background p-3 text-sm"
+                    value={terms}
+                    onChange={(e) => setTerms(e.target.value)}
+                    placeholder="Um nome de pessoa, empresa ou identificador por linha"
+                  />
+                  <span className="block text-xs leading-relaxed text-muted-foreground">
+                    A remoção automática é assistida e pode deixar dados pessoais. Confira todos os
+                    rascunhos antes de publicar.
+                  </span>
+                </label>
+                <label className="flex items-start gap-2.5 text-sm leading-relaxed">
+                  <input
+                    type="checkbox"
+                    className="mt-1 size-4 shrink-0 accent-current"
+                    checked={authorized}
+                    onChange={(e) => setAuthorized(e.target.checked)}
+                  />
+                  Confirmo que tenho autorização para usar estas conversas na biblioteca comum da
+                  plataforma.
+                </label>
+              </div>
+            </fieldset>
+            {error && (
+              <p
+                role="alert"
+                className="mx-5 mb-4 rounded-xl border border-destructive/30 p-3 text-sm text-destructive sm:mx-6"
+              >
+                {error}
               </p>
             )}
-            <Button variant="outline" size="sm" onClick={() => setDetailId(result.id)}>
-              Ver resultado da importação
-            </Button>
-          </div>
-        )}
-        <details className="mt-5 text-xs text-muted-foreground">
-          <summary className="cursor-pointer">Como preparar o arquivo?</summary>
-          <p className="mt-3 leading-relaxed">
-            Use o modelo JSON com uma lista messages. Cada mensagem contém role (customer para
-            cliente ou agent para atendente) e text. O sistema usa pares consecutivos cliente →
-            atendente; não usa IA nesta extração. TXT/ZIP do WhatsApp e PDF ainda não são aceitos.
-          </p>
-        </details>
-      </section>
-      <section className="overflow-hidden rounded-2xl border bg-card shadow-card">
-        <div className="border-b p-5">
-          <h2 className="font-semibold">Histórico de importações</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Arquivos recebidos e rascunhos gerados.
-          </p>
-        </div>
-        {loading ? (
-          <div role="status" aria-label="Carregando importações" className="space-y-3 p-5">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-20" />
-            ))}
-          </div>
-        ) : listError ? (
-          <div role="alert" className="space-y-3 p-5 text-sm">
-            <p>{listError}</p>
-            <Button variant="outline" onClick={() => setRevision((v) => v + 1)}>
-              Tentar novamente
-            </Button>
-          </div>
-        ) : !batches.length ? (
-          <p className="p-7 text-sm text-muted-foreground">Nenhuma importação nesta página.</p>
-        ) : (
-          <div className="divide-y">
-            {batches.map((batch) => (
-              <button
-                key={batch.id}
-                onClick={() => setDetailId(batch.id)}
-                className="block w-full space-y-2 p-5 text-left transition-colors hover:bg-muted/40"
+            <div className="flex flex-wrap items-center justify-between gap-4 border-t bg-muted/15 px-5 py-4 sm:px-6">
+              <span className="text-xs text-muted-foreground">
+                Nada é publicado automaticamente.
+              </span>
+              <Button
+                type="submit"
+                disabled={!file || !authorized || reference.trim().length < 10 || busy || reading}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium">{formatDate(batch.created_at)}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {batch.candidate_ids.length} rascunho(s)
-                  </span>
-                </div>
-                <p className="line-clamp-2 break-words text-sm text-muted-foreground">
-                  {batch.authorization_reference}
+                <ArrowUpFromLine className="mr-2 size-4" />
+                {busy ? "Importando…" : "Importar e gerar rascunhos"}
+              </Button>
+            </div>
+          </form>
+          {result && (
+            <div role="status" className="m-5 space-y-3 rounded-xl border bg-muted/20 p-4 sm:m-6">
+              <p className="flex items-center gap-2 text-sm font-medium">
+                <Check className="size-4 text-brand" />
+                Importação concluída
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {result.candidate_ids.length} rascunho(s) gerado(s) · {result.redactions}{" "}
+                ocorrência(s) removida(s).
+              </p>
+              {!result.candidate_ids.length && (
+                <p className="text-sm">
+                  Nenhum par elegível de pergunta e resposta foi encontrado. Trechos com condições
+                  comerciais particulares são descartados.
                 </p>
-                <p className="text-xs text-brand">Consultar resultado →</p>
-              </button>
-            ))}
-          </div>
-        )}
-        <div className="flex items-center justify-between border-t p-4 text-xs text-muted-foreground">
-          <span>Página {offset / 20 + 1}</span>
-          <div className="flex gap-2">
-            <Button
-              size="icon"
-              variant="outline"
-              aria-label="Importações anteriores"
-              disabled={loading || offset === 0}
-              onClick={() => setOffset((v) => Math.max(0, v - 20))}
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-            <Button
-              size="icon"
-              variant="outline"
-              aria-label="Próximas importações"
-              disabled={loading || !!listError || batches.length < 20}
-              onClick={() => setOffset((v) => v + 20)}
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
-      </section>
-      <Dialog
-        open={!!detailId}
-        onOpenChange={(open) => {
-          if (!open) setDetailId(null);
-        }}
-      >
-        <DialogContent className="max-h-[calc(100dvh-24px)] w-[calc(100%-24px)] max-w-2xl overflow-y-auto rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>Resultado da importação</DialogTitle>
-            <DialogDescription>
-              Mensagens após remoção assistida de identificadores. Revisão humana obrigatória.
-            </DialogDescription>
-          </DialogHeader>
-          {detailLoading ? (
-            <p role="status" className="flex items-center gap-2">
-              <Loader2 className="size-4 animate-spin" />
-              Carregando…
-            </p>
-          ) : detailError ? (
-            <p role="alert" className="text-sm text-destructive">
-              {detailError}
-            </p>
-          ) : (
-            detail && (
-              <div className="space-y-4">
-                <p className="break-words text-sm">Origem: {detail.authorization_reference}</p>
-                <p className="text-xs text-muted-foreground">
-                  {detail.redactions} ocorrência(s) removida(s) · {detail.candidate_ids.length}{" "}
-                  rascunho(s)
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {detail.candidate_ids.map((id, index) => (
-                    <Button
-                      key={id}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setDetailId(null);
-                        onReview(id);
-                      }}
-                    >
-                      Revisar rascunho {index + 1}
-                    </Button>
-                  ))}
-                </div>
-                <div className="space-y-3">
-                  {detail.sanitized_messages.map((message, index) => (
-                    <div key={index} className="rounded-xl border bg-muted/20 p-3">
-                      <p className="mb-1 text-xs font-medium text-muted-foreground">
-                        {message.role === "customer" ? "Cliente" : "Atendente"}
-                      </p>
-                      <p className="whitespace-pre-wrap break-words text-sm">{message.text}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )
+              )}
+              <Button variant="outline" size="sm" onClick={() => setDetailId(result.id)}>
+                Ver resultado da importação
+              </Button>
+            </div>
           )}
-        </DialogContent>
-      </Dialog>
-    </div>
+        </section>
+        <SheetContent
+          side="right"
+          overlayClassName="bg-black/30 backdrop-blur-sm motion-reduce:animate-none"
+          className="flex h-dvh w-full flex-col gap-0 bg-card p-0 sm:max-w-[640px] motion-reduce:animate-none motion-reduce:transition-none"
+          onCloseAutoFocus={(event) => {
+            if (detailId) event.preventDefault();
+          }}
+        >
+          <SheetHeader className="shrink-0 border-b px-5 py-6 pr-12 text-left sm:px-6">
+            <SheetTitle className="flex items-center gap-2">
+              <History className="size-5 text-muted-foreground" />
+              Histórico de importações
+            </SheetTitle>
+            <SheetDescription>
+              Consulte seus envios e continue a revisão dos rascunhos.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            {loading ? (
+              <div role="status" aria-label="Carregando importações" className="space-y-3 p-5">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-20" />
+                ))}
+              </div>
+            ) : listError ? (
+              <div role="alert" className="space-y-3 p-5 text-sm">
+                <p>{listError}</p>
+                <Button variant="outline" onClick={() => setRevision((v) => v + 1)}>
+                  Tentar novamente
+                </Button>
+              </div>
+            ) : !batches.length ? (
+              <div className="flex flex-col items-center gap-2 px-5 py-9 text-center">
+                <History className="mb-1 size-6 text-muted-foreground" />
+                <h3 className="text-sm font-medium">Nenhuma importação por aqui</h3>
+                <p className="max-w-sm text-sm text-muted-foreground">
+                  Depois do primeiro envio, você poderá acompanhar os resultados e acessar os
+                  rascunhos neste histórico.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y">
+                <div className="hidden grid-cols-[110px_minmax(0,1fr)_100px] gap-4 bg-muted/20 px-6 py-3 text-xs text-muted-foreground md:grid">
+                  <span>Data do envio</span>
+                  <span>Origem / autorização</span>
+
+                  <span className="text-right">Ação</span>
+                </div>
+                {batches.map((batch) => (
+                  <button
+                    key={batch.id}
+                    onClick={() => {
+                      setHistoryOpen(false);
+                      setDetailId(batch.id);
+                    }}
+                    className="grid w-full items-center gap-3 p-5 text-left transition-colors hover:bg-muted/40 md:grid-cols-[110px_minmax(0,1fr)_100px] md:gap-4 md:px-6"
+                  >
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(batch.created_at)}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="line-clamp-2 break-words text-sm">
+                        {batch.authorization_reference}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {batch.candidate_ids.length} rascunho(s) gerado(s)
+                      </p>
+                    </div>
+
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium md:justify-self-end">
+                      Ver resultado
+                      <ArrowUpRight className="size-3.5" />
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center justify-between border-t px-5 py-4 text-xs text-muted-foreground sm:px-6">
+            <span>Página {offset / 20 + 1}</span>
+            <div className="flex gap-2">
+              <Button
+                size="icon"
+                variant="outline"
+                aria-label="Importações anteriores"
+                disabled={loading || offset === 0}
+                onClick={() => setOffset((v) => Math.max(0, v - 20))}
+              >
+                <ChevronLeft className="size-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                aria-label="Próximas importações"
+                disabled={loading || !!listError || batches.length < 20}
+                onClick={() => setOffset((v) => v + 20)}
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+        <Dialog
+          open={!!detailId}
+          onOpenChange={(open) => {
+            if (!open) setDetailId(null);
+          }}
+        >
+          <DialogContent className="max-h-[calc(100dvh-24px)] w-[calc(100%-24px)] max-w-2xl overflow-y-auto rounded-2xl">
+            <DialogHeader>
+              <DialogTitle>Resultado da importação</DialogTitle>
+              <DialogDescription>
+                Mensagens após remoção assistida de identificadores. Revisão humana obrigatória.
+              </DialogDescription>
+            </DialogHeader>
+            {detailLoading ? (
+              <p role="status" className="flex items-center gap-2">
+                <Loader2 className="size-4 animate-spin" />
+                Carregando…
+              </p>
+            ) : detailError ? (
+              <p role="alert" className="text-sm text-destructive">
+                {detailError}
+              </p>
+            ) : (
+              detail && (
+                <div className="space-y-4">
+                  <p className="break-words text-sm">Origem: {detail.authorization_reference}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {detail.redactions} ocorrência(s) removida(s) · {detail.candidate_ids.length}{" "}
+                    rascunho(s)
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {detail.candidate_ids.map((id, index) => (
+                      <Button
+                        key={id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setDetailId(null);
+                          onReview(id);
+                        }}
+                      >
+                        Revisar rascunho {index + 1}
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="space-y-3">
+                    {detail.sanitized_messages.map((message, index) => (
+                      <div key={index} className="rounded-xl border bg-muted/20 p-3">
+                        <p className="mb-1 text-xs font-medium text-muted-foreground">
+                          {message.role === "customer" ? "Cliente" : "Atendente"}
+                        </p>
+                        <p className="whitespace-pre-wrap break-words text-sm">{message.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
+    </Sheet>
   );
 }

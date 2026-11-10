@@ -87,3 +87,13 @@ Login alinhado à referência visual, mantendo a paleta atual e o Turnstile. Ár
 - Skeletons, estados vazios, erros/retry, sessão expirada e layouts desktop/mobile incluídos. Textos são renderizados como texto, sem HTML executável.
 
 Nenhum conteúdo é publicado automaticamente. A remoção de identificadores é assistida e exige revisão humana. TXT/ZIP do WhatsApp, PDF, políticas privadas de empresas, embeddings e respostas de IA não estão incluídos. Teste integrado: `npx playwright test e2e/knowledge.spec.ts` (API real com SQLite temporário; não executa Docker nem integrações externas).
+
+Prévia visual de 10/11/2026: a aba Importações reúne arquivo e autorização no mesmo painel, com rodapé de envio e histórico acessível pelo botão Histórico de importações em um modal lateral direito. Mantém o fluxo JSON e as confirmações existentes; em telas menores os blocos ficam empilhados e o painel de histórico ocupa a largura da tela. O histórico possui rolagem interna, paginação fixa, fundo desfocado e fechamento por Escape com retorno de foco ao botão. Validada com o E2E da biblioteca, build/TypeScript e lint. Esta revisão visual está local até sua publicação.
+
+## Configurações de plataforma
+`/configuracoes` possui abas OpenAI e Administradores integradas ao BFF e à API real.
+- Qualquer superadmin ativo pode gerenciar/testar a credencial OpenAI, confirmando a própria senha. Chave write-only, sem localStorage e sem NEXT_PUBLIC; criptografia e diagnóstico ficam no backend. O formulário informa armazenamento não configurado e diferencia salvar credencial de testar acesso. O diagnóstico não gera respostas nem valida saldo.
+- Gestão de administradores com busca/paginação, cadastro, edição e desativação confirmada. O primeiro admin tem indicação de conta protegida, sem ação de edição para outras contas. Ele edita a si mesmo; sua desativação é proibida. A API também aplica todas as regras, inclusive chamadas diretas, e revoga sessões quando necessário.
+- Skeletons, erros/retry, confirmações de senha e layout mobile. `/scripts/start-e2e-backend.py` gera uma chave mestra descartável apenas para SQLite temporário, sem credencial real OpenAI. Teste: `npx playwright test e2e/platform-settings.spec.ts`. O contrato do provedor é testado no backend com HTTP simulado; o E2E não chama OpenAI com chave fictícia.
+
+A API exige a migration `20261110_platform_settings` e `PLATFORM_CREDENTIAL_KEY` configurada somente no backend. A chave real OpenAI deve ser informada pelo formulário; validação real pendente até cadastrá-la. A configuração não habilita automaticamente IA comercial ou suporte.

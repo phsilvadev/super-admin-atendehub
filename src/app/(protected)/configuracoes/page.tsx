@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/page-placeholder";
+import { PlatformSettingsScreen } from "@/components/screens/platform-settings";
 export const metadata = { title: "Configurações" };
 export default function Page() {
-  return <PagePlaceholder title="Configurações" description="Preferências gerais da plataforma." />;
+  return <PlatformSettingsScreen />;
 }

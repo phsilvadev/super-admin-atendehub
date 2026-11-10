@@ -12,6 +12,10 @@ const allowed: Record<string, string[]> = {
 };
 const uuid = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 function methods(resource: string) {
+  if (resource === "administrators") return ["GET", "POST"];
+  if (new RegExp(`^administrators/${uuid}$`).test(resource)) return ["PATCH"];
+  if (resource === "settings/openai") return ["GET", "PATCH"];
+  if (["settings/openai/test", "settings/openai/remove"].includes(resource)) return ["POST"];
   if (resource === "knowledge" || resource === "knowledge/imports") return ["GET", "POST"];
   if (new RegExp(`^knowledge/imports/${uuid}$`).test(resource)) return ["GET"];
   if (new RegExp(`^knowledge/${uuid}$`).test(resource)) return ["GET", "PATCH"];
@@ -71,7 +75,7 @@ async function forward(request: NextRequest, { params }: { params: Promise<{ pat
       headers.set("Content-Type", "application/json");
     }
     const query = new URLSearchParams();
-    if (["companies", "knowledge", "knowledge/imports"].includes(resource))
+    if (["companies", "knowledge", "knowledge/imports", "administrators"].includes(resource))
       for (const key of ["q", "status", "kind", "category", "offset", "limit"]) {
         const value = request.nextUrl.searchParams.get(key);
         if (value !== null) query.set(key, value);

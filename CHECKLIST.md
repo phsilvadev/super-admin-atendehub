@@ -64,3 +64,12 @@ Publicado: commit 3038bb6, Railway 41c70529-adb5-4fa7-9aaf-83b774eae8fd em SUCCE
 
 ### Simplificação da base de conhecimento
 - [x] Remover indicadores e entrada duplicada Importações do menu lateral; manter a aba interna e redirecionar a URL antiga para /base-conhecimento?tab=imports. Build/TypeScript, lint e E2E do fluxo completo aprovados; prints desktop/mobile atualizados.
+
+### Padrão visual de importação — 10/11/2026
+- [x] Unificar o formulário em um painel com arquivo e autorização alinhados, histórico abaixo em listagem e responsividade. Build/TypeScript, lint e E2E completo com API/SQLite reais aprovados; prints desktop/mobile gerados. Prévia local, sem push ou publicação nesta etapa.
+
+### Histórico em painel lateral — 10/11/2026
+- [x] Mover histórico para modal lateral direito com botão, fundo desfocado, rolagem interna e paginação fixa. Testados abertura, seleção de resultado, Escape/restauração de foco e largura mobile no E2E real; build/TypeScript/lint aprovados. Prints desktop/mobile gerados. Prévia local, sem push/publicação.
+
+### Configurações da plataforma — OpenAI e administradores
+- [x] Integrar abas OpenAI e Administradores com cadastro/edição/desativação e proteção do primeiro admin; qualquer superadmin gerencia OpenAI. Build/TypeScript/lint, 24 Vitest e E2E real API/SQLite de configurações e autenticação/isolamento aprovados; prints desktop/mobile gerados. Código local, sem push/publicação. Chave real OpenAI e diagnóstico externo pendentes.

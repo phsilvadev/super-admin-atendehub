@@ -40,6 +40,7 @@ test("biblioteca real: importar, revisar, publicar, editar com conflito e desati
     page.getByRole("button", { name: "Termos para tubos de aço", exact: true }),
   ).toBeVisible();
   await page.getByRole("tab", { name: "Importações", exact: true }).click();
+  await page.screenshot({ path: "/workspace/importacao-reorganizada-desktop.png", fullPage: true });
   const upload = page.getByLabel("Arquivo de conversas JSON", { exact: true });
   await upload.setInputFiles({
     name: "erro.json",
@@ -82,7 +83,29 @@ test("biblioteca real: importar, revisar, publicar, editar com conflito e desati
   });
   await page.getByRole("button", { name: "Importar e gerar rascunhos", exact: true }).click();
   await expect(page.getByText("Importação concluída", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Ver resultado da importação", exact: true }).click();
+  const historyTrigger = page.getByRole("button", {
+    name: "Histórico de importações",
+    exact: true,
+  });
+  await historyTrigger.click();
+  const historyPanel = page.getByRole("dialog", { name: "Histórico de importações", exact: true });
+  await expect(
+    historyPanel.getByRole("button").filter({ hasText: "Arquivo autorizado exclusivamente" }),
+  ).toBeVisible();
+  await expect
+    .poll(async () => {
+      const bounds = await historyPanel.boundingBox();
+      return Math.round((bounds?.x ?? 0) + (bounds?.width ?? 0));
+    })
+    .toBe(1440);
+  await page.screenshot({
+    path: "/workspace/importacao-historico-aside-desktop.png",
+    animations: "disabled",
+  });
+  await historyPanel
+    .getByRole("button")
+    .filter({ hasText: "Arquivo autorizado exclusivamente" })
+    .click();
   await expect(dialog.getByText("pessoa@example.com", { exact: false })).toHaveCount(0);
   await expect(dialog.getByText("Pessoa Exemplo", { exact: false })).toHaveCount(0);
   await dialog.getByRole("button", { name: "Revisar rascunho 1", exact: true }).click();
@@ -171,6 +194,21 @@ test("biblioteca real: importar, revisar, publicar, editar com conflito e desati
   expect(bounds!.width).toBeLessThanOrEqual(390);
   expect(bounds!.height).toBeLessThanOrEqual(844);
   await dialog.getByRole("button", { name: "Fechar", exact: true }).click();
+  await page.screenshot({ path: "/workspace/importacao-reorganizada-mobile.png", fullPage: true });
+  await historyTrigger.click();
+  await expect(
+    historyPanel.getByRole("button").filter({ hasText: "Arquivo autorizado exclusivamente" }),
+  ).toBeVisible();
+  await expect
+    .poll(async () => Math.round((await historyPanel.boundingBox())?.width ?? 0))
+    .toBe(390);
+  await page.screenshot({
+    path: "/workspace/importacao-historico-aside-mobile.png",
+    animations: "disabled",
+  });
+  await page.keyboard.press("Escape");
+  await expect(historyPanel).not.toBeVisible();
+  await expect(historyTrigger).toBeFocused();
   await page.goto("/importacoes");
   await expect(page).toHaveURL(/\/base-conhecimento\?tab=imports$/);
   await expect(
