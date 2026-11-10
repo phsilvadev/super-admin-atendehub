@@ -34,7 +34,6 @@ import {
   type Administrator,
 } from "@/lib/api/platform-settings";
 import { errorMessage } from "@/lib/api/knowledge";
-import { formatDate } from "@/lib/api/companies";
 export function PlatformSettingsScreen() {
   return (
     <div className="space-y-6">
@@ -74,26 +73,31 @@ function OpenAISettings() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [reload, setReload] = useState(0);
+  const [editing, setEditing] = useState(false);
   const [model, setModel] = useState("");
   const [key, setKey] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState("");
-  const [remove, setRemove] = useState(false);
+  const [confirmation, setConfirmation] = useState<"test" | "remove" | null>(null);
   useEffect(() => {
     let alive = true;
     setLoading(true);
     setError("");
     getAI()
-      .then((v) => {
+      .then((value) => {
         if (alive) {
-          setConfig(v);
-          setModel(v.model);
+          setConfig(value);
+          setModel(value.model);
           setKey("");
           setPassword("");
+          setEditing(false);
         }
       })
       .catch((e) => {
-        if (alive) setError(errorMessage(e));
+        if (alive) {
+          setConfig(null);
+          setError(errorMessage(e));
+        }
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -103,6 +107,14 @@ function OpenAISettings() {
     };
   }, [reload]);
   const dirty = !!config && (model !== config.model || !!key);
+  const validated = config?.configured && config.check_status === "verified";
+  const failed = !!config?.configured && !!config.check_status && !validated;
+  function ask(action: "test" | "remove") {
+    setPassword("");
+    setError("");
+    setNotice("");
+    setConfirmation(action);
+  }
   async function act(action: "save" | "test" | "remove") {
     if (!config || busy) return;
     setBusy(action);
@@ -122,10 +134,11 @@ function OpenAISettings() {
       setModel(value.model);
       setKey("");
       setPassword("");
-      setRemove(false);
+      setEditing(false);
+      setConfirmation(null);
       setNotice(
         action === "save"
-          ? "Configuração salva. Teste o acesso ao modelo."
+          ? "Chave salva com segurança. A configuração está cadastrada; agora você pode testar a conexão."
           : action === "remove"
             ? "Chave removida do armazenamento da plataforma."
             : (diagnosticLabels[value.check_status ?? "unavailable"] ?? "Teste concluído."),
@@ -137,9 +150,13 @@ function OpenAISettings() {
       setBusy("");
     }
   }
+  function reloadConfig() {
+    setConfirmation(null);
+    setReload((v) => v + 1);
+  }
   return (
     <section className="max-w-4xl overflow-hidden rounded-2xl border bg-card shadow-card">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b p-5 sm:p-6">
+      <header className="flex flex-wrap items-start justify-between gap-3 border-b p-5 sm:p-6">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-semibold">
             <KeyRound className="size-5 text-muted-foreground" />
@@ -149,12 +166,18 @@ function OpenAISettings() {
             Credencial da plataforma, protegida no servidor.
           </p>
         </div>
-        {config && (
-          <Badge variant={config.configured ? "green" : "outline"}>
-            {config.configured ? "Chave cadastrada" : "Não configurada"}
+        {!loading && config && (
+          <Badge variant={validated ? "green" : failed ? "yellow" : "outline"}>
+            {validated
+              ? "Conexão validada"
+              : failed
+                ? "Verificar conexão"
+                : config.configured
+                  ? "Chave salva"
+                  : "Não configurada"}
           </Badge>
         )}
-      </div>
+      </header>
       {loading ? (
         <div role="status" aria-label="Carregando configuração OpenAI" className="space-y-4 p-6">
           <Skeleton className="h-12" />
@@ -162,190 +185,316 @@ function OpenAISettings() {
         </div>
       ) : (
         <div className="space-y-5 p-5 sm:p-6">
-          {error && (
+          {error && !confirmation && (
             <div role="alert" className="rounded-xl border border-destructive/30 p-3 text-sm">
               <p>{error}</p>
               <Button
-                className="mt-2"
-                size="sm"
                 variant="outline"
+                size="sm"
+                className="mt-2"
                 disabled={!!busy}
-                onClick={() => setReload((v) => v + 1)}
+                onClick={reloadConfig}
               >
                 Recarregar configuração
               </Button>
             </div>
           )}
           {notice && (
-            <p role="status" className="flex items-start gap-2 rounded-xl border p-3 text-sm">
-              <Check className="mt-0.5 size-4 shrink-0 text-brand" />
+            <p
+              role={failed ? "alert" : "status"}
+              className="rounded-xl border bg-muted/20 p-3 text-sm"
+            >
               {notice}
             </p>
           )}
           {config && (
             <>
-              {!config.can_manage && (
-                <p className="rounded-xl bg-muted/40 p-4 text-sm">
-                  Sua conta não possui permissão para alterar esta configuração.
-                </p>
-              )}
               {!config.storage_ready && (
                 <p className="rounded-xl border p-4 text-sm">
-                  O armazenamento seguro precisa ser ativado no backend antes de cadastrar a chave.
+                  O armazenamento seguro precisa ser ativado no backend antes de cadastrar ou testar
+                  a chave.
                 </p>
               )}
-              <form
-                className="space-y-5"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void act("save");
-                }}
-              >
-                <fieldset className="space-y-4" disabled={!config.can_manage || !!busy}>
-                  <label className="block space-y-1.5 text-sm">
-                    <span>Chave da API OpenAI</span>
-                    <Input
-                      aria-label="Chave da API OpenAI"
-                      type="password"
-                      autoComplete="new-password"
-                      spellCheck={false}
-                      maxLength={512}
-                      minLength={20}
-                      value={key}
-                      onChange={(e) => {
-                        setKey(e.target.value);
-                        setNotice("");
-                      }}
-                      placeholder={
-                        config.configured
-                          ? "Chave protegida · preencha apenas para substituir"
-                          : "Cole sua chave da API OpenAI"
-                      }
-                    />
-                    <span className="block text-xs leading-relaxed text-muted-foreground">
-                      A chave não é devolvida pela API. Deixe vazio para manter a credencial
-                      cadastrada.
+              {config.configured && !editing ? (
+                <>
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-xl border bg-muted/30">
+                      <ShieldCheck className="size-5 text-muted-foreground" />
                     </span>
-                  </label>
-                  <label className="block space-y-1.5 text-sm">
-                    <span>Modelo</span>
-                    <Input
-                      required
-                      pattern="[a-zA-Z0-9][a-zA-Z0-9._:\-]*"
-                      maxLength={120}
-                      value={model}
-                      onChange={(e) => {
-                        setModel(e.target.value);
-                        setNotice("");
-                      }}
-                      placeholder="Ex.: gpt-4.1-mini"
-                    />
-                    <span className="block text-xs text-muted-foreground">
-                      Informe o identificador de um modelo disponível no seu projeto OpenAI.
-                    </span>
-                  </label>
-                  <label className="block space-y-1.5 text-sm">
-                    <span>Sua senha atual</span>
-                    <Input
-                      aria-label="Sua senha atual"
-                      type="password"
-                      required
-                      autoComplete="current-password"
-                      maxLength={128}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Confirme sua senha para continuar"
-                    />
-                  </label>
-                </fieldset>
-                <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={
-                      !config.can_manage ||
-                      !config.configured ||
-                      !password ||
-                      !!busy ||
-                      dirty ||
-                      !config.storage_ready
-                    }
-                    onClick={() => void act("test")}
-                  >
-                    {busy === "test" ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-                    Testar conexão
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={
-                      !config.can_manage ||
-                      !password ||
-                      !!busy ||
-                      !dirty ||
-                      !model ||
-                      (!key && !config.configured) ||
-                      !config.storage_ready
-                    }
-                  >
-                    {busy === "save" ? "Salvando…" : "Salvar configuração"}
-                  </Button>
-                </div>
-              </form>
-              <div className="space-y-2 rounded-xl bg-muted/30 p-4 text-xs leading-relaxed text-muted-foreground">
-                <p>
-                  <span className="font-medium text-foreground">Último teste:</span>{" "}
-                  {config.checked_at
-                    ? `${formatDate(config.checked_at)} · ${diagnosticLabels[config.check_status ?? "unavailable"] ?? "Indisponível"}`
-                    : "Nenhum teste realizado"}
-                </p>
-                <p>
-                  O teste consulta o acesso ao modelo na API oficial. Não gera respostas, não envia
-                  conversas e não valida saldo ou limites de geração.
-                </p>
-                <p>
-                  Esta configuração prepara a integração. A IA comercial e o chat de suporte serão
-                  conectados em etapas separadas.
-                </p>
-              </div>
-              {config.can_manage && config.configured && (
-                <div className="border-t pt-4">
-                  {remove ? (
-                    <div className="space-y-3 text-sm">
-                      <p>
-                        Remover a chave impede novas consultas pela plataforma. Para revogá-la na
-                        OpenAI, use o painel do provedor.
+                    <div>
+                      <h3 className="font-semibold">Credencial cadastrada</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                        {validated
+                          ? "O acesso ao modelo foi confirmado no último teste."
+                          : failed
+                            ? "Sua chave está salva, mas o último teste precisa de atenção."
+                            : "Sua chave já está salva no servidor. Falta testar o acesso ao modelo."}
                       </p>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          disabled={!!busy}
-                          onClick={() => setRemove(false)}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          disabled={!!busy || !password || dirty}
-                          onClick={() => void act("remove")}
-                        >
-                          Confirmar remoção
-                        </Button>
-                      </div>
                     </div>
-                  ) : (
-                    <Button variant="outline" disabled={!!busy} onClick={() => setRemove(true)}>
+                  </div>
+                  <dl className="grid gap-x-8 gap-y-5 rounded-xl border p-5 sm:grid-cols-2">
+                    <div>
+                      <dt className="text-xs text-muted-foreground">Chave da API</dt>
+                      <dd className="mt-2 flex items-center gap-2 text-sm">
+                        <LockKeyhole className="size-3.5 text-muted-foreground" />
+                        <span aria-label="Chave armazenada e protegida">••••••••</span>
+                        <span className="text-xs text-muted-foreground">Protegida no servidor</span>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-muted-foreground">Modelo configurado</dt>
+                      <dd className="mt-2 break-all text-sm font-medium">{config.model}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-muted-foreground">Status do acesso</dt>
+                      <dd className="mt-2 text-sm">
+                        {validated
+                          ? "Validado no último teste"
+                          : failed
+                            ? (diagnosticLabels[config.check_status ?? "unavailable"] ??
+                              "Falha no teste")
+                            : "Aguardando teste de conexão"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-muted-foreground">Último teste</dt>
+                      <dd className="mt-2 text-sm">
+                        {config.checked_at
+                          ? new Intl.DateTimeFormat("pt-BR", {
+                              dateStyle: "short",
+                              timeStyle: "short",
+                              timeZone: "America/Sao_Paulo",
+                            }).format(new Date(config.checked_at * 1000))
+                          : "Nenhum teste realizado"}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+                    <Button
+                      variant="outline"
+                      disabled={!config.can_manage || !!busy}
+                      onClick={() => ask("remove")}
+                    >
                       Remover chave
                     </Button>
-                  )}
-                </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        disabled={!config.can_manage || !!busy}
+                        onClick={() => {
+                          setEditing(true);
+                          setError("");
+                          setNotice("");
+                          setPassword("");
+                        }}
+                      >
+                        Editar configuração
+                      </Button>
+                      <Button
+                        disabled={!config.can_manage || !config.storage_ready || !!busy}
+                        onClick={() => ask("test")}
+                      >
+                        Testar conexão
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <form
+                  className="space-y-5"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void act("save");
+                  }}
+                >
+                  <div>
+                    <h3 className="font-semibold">
+                      {config.configured ? "Editar configuração" : "Cadastrar credencial"}
+                    </h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {config.configured
+                        ? "Altere o modelo ou substitua a chave. Salvar exige um novo teste de conexão."
+                        : "Cadastre sua chave para preparar a conexão da plataforma."}
+                    </p>
+                  </div>
+                  <fieldset className="space-y-4" disabled={!config.can_manage || !!busy}>
+                    <label className="block space-y-1.5 text-sm">
+                      <span>Chave da API OpenAI</span>
+                      <Input
+                        aria-label="Chave da API OpenAI"
+                        type="password"
+                        required={!config.configured}
+                        autoComplete="new-password"
+                        spellCheck={false}
+                        minLength={20}
+                        maxLength={512}
+                        value={key}
+                        onChange={(e) => setKey(e.target.value)}
+                        placeholder={
+                          config.configured
+                            ? "Preencha apenas para substituir a chave"
+                            : "Cole sua chave da API OpenAI"
+                        }
+                      />
+                      <span className="block text-xs text-muted-foreground">
+                        {config.configured
+                          ? "Deixe vazio para manter a chave armazenada."
+                          : "Após salvar, a chave não será exibida novamente."}
+                      </span>
+                    </label>
+                    <label className="block space-y-1.5 text-sm">
+                      <span>Modelo</span>
+                      <Input
+                        aria-label="Modelo"
+                        required
+                        maxLength={120}
+                        value={model}
+                        onChange={(e) => setModel(e.target.value)}
+                        placeholder="Ex.: gpt-4.1-mini"
+                      />
+                    </label>
+                    <label className="block space-y-1.5 text-sm">
+                      <span>Sua senha de superadministrador</span>
+                      <Input
+                        aria-label="Sua senha atual"
+                        type="password"
+                        required
+                        autoComplete="current-password"
+                        maxLength={128}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="A mesma senha usada para entrar neste painel"
+                      />
+                    </label>
+                  </fieldset>
+                  <div className="flex justify-end gap-2 border-t pt-4">
+                    {config.configured && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={!!busy}
+                        onClick={() => {
+                          setEditing(false);
+                          setModel(config.model);
+                          setKey("");
+                          setPassword("");
+                          setError("");
+                        }}
+                      >
+                        Cancelar edição
+                      </Button>
+                    )}
+                    <Button
+                      type="submit"
+                      disabled={
+                        !config.can_manage ||
+                        !config.storage_ready ||
+                        !!busy ||
+                        !dirty ||
+                        !password ||
+                        !model ||
+                        (!key && !config.configured)
+                      }
+                    >
+                      {busy === "save" ? "Salvando…" : "Salvar configuração"}
+                    </Button>
+                  </div>
+                </form>
               )}
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Salvar confirma o armazenamento da chave. Testar verifica o acesso ao modelo na API
+                oficial, sem gerar respostas ou enviar conversas. O teste não valida saldo nem
+                habilita automaticamente os atendimentos por IA.
+              </p>
             </>
           )}
         </div>
       )}
+      <Dialog
+        open={!!confirmation}
+        onOpenChange={(open) => {
+          if (!open && !busy) {
+            setConfirmation(null);
+            setPassword("");
+            setError("");
+          }
+        }}
+      >
+        <DialogContent className="max-h-[calc(100dvh-24px)] w-[calc(100%-24px)] max-w-md overflow-y-auto rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {confirmation === "remove" ? "Remover chave OpenAI" : "Testar conexão OpenAI"}
+            </DialogTitle>
+            <DialogDescription>
+              {confirmation === "remove"
+                ? "Remove a chave armazenada na plataforma. Para revogá-la na OpenAI, use o painel do provedor."
+                : "Consulta o acesso ao modelo configurado, sem gerar respostas. Confirme sua senha de superadministrador."}
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (confirmation) void act(confirmation);
+            }}
+          >
+            <label className="block space-y-1.5 text-sm">
+              <span>Sua senha de superadministrador</span>
+              <Input
+                aria-label="Sua senha atual"
+                type="password"
+                required
+                autoComplete="current-password"
+                maxLength={128}
+                disabled={!!busy}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="A mesma senha usada para entrar neste painel"
+              />
+            </label>
+            {error && (
+              <div role="alert" className="space-y-2 text-sm text-destructive">
+                <p>{error}</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={!!busy}
+                  onClick={reloadConfig}
+                >
+                  Recarregar configuração
+                </Button>
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!!busy}
+                onClick={() => {
+                  setConfirmation(null);
+                  setPassword("");
+                  setError("");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                variant={confirmation === "remove" ? "destructive" : "default"}
+                disabled={!!busy || !password}
+              >
+                {busy ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                {confirmation === "remove" ? "Confirmar remoção" : "Confirmar teste"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
+
 function Administrators() {
   const [rows, setRows] = useState<Administrator[]>([]);
   const [total, setTotal] = useState(0);

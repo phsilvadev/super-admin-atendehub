@@ -97,3 +97,5 @@ Prévia visual de 10/11/2026: a aba Importações reúne arquivo e autorização
 - Skeletons, erros/retry, confirmações de senha e layout mobile. `/scripts/start-e2e-backend.py` gera uma chave mestra descartável apenas para SQLite temporário, sem credencial real OpenAI. Teste: `npx playwright test e2e/platform-settings.spec.ts`. O contrato do provedor é testado no backend com HTTP simulado; o E2E não chama OpenAI com chave fictícia.
 
 A API exige a migration `20261110_platform_settings` e `PLATFORM_CREDENTIAL_KEY` configurada somente no backend. A chave real OpenAI deve ser informada pelo formulário; validação real pendente até cadastrá-la. A configuração não habilita automaticamente IA comercial ou suporte.
+
+OpenAI após cadastro: a configuração salva abre em resumo com modelo, credencial protegida, estado do acesso e último teste. O formulário aparece apenas no cadastro/edição; cancelar descarta alterações locais. Teste/remoção pedem senha em modal. Salvar a chave não equivale a conexão validada: estados separados mostram chave salva, teste confirmado ou falha de acesso. O resumo é carregado da API também após recarregar a página.

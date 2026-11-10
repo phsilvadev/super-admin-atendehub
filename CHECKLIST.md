@@ -76,3 +76,6 @@ Publicado: commit 3038bb6, Railway 41c70529-adb5-4fa7-9aaf-83b774eae8fd em SUCCE
 
 
 Publicação em 10/11/2026: push development concluído nos três repositórios (API 6c609a1, cliente 3af6530, superadmin 9b49a06). Railway API 44c36254-c40c-44dc-8602-3da17b50484b, cliente c7ca8ff9-1a45-486a-9fc9-2643cf3a7635 e superadmin 5cf06c23-ce22-4086-a848-3d816a7e820f em SUCCESS. Readiness API e logins dos frontends HTTP200; configuração sem sessão401. Chave mestra de armazenamento configurada no ambiente protegido do backend, sem expor valor. Chave OpenAI real e validação externa pendentes de cadastro pelo formulário. Incluídos histórico lateral de importações e indicadores da central no Dashboard.
+
+### OpenAI — estado após cadastro
+- [x] Mostrar resumo persistido após salvar/recarregar, separar chave salva de conexão validada/falha, recolher formulário em edição e pedir senha em modal para testar/remover. Build/TypeScript, lint e E2E API/SQLite real aprovados; diagnóstico de provedor simulado apenas no teste visual, sem chamada com chave fictícia. Prints gerados.

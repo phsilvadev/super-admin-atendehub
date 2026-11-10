@@ -20,13 +20,56 @@ test("configurações: chave write-only, gestão real e primeiro administrador p
   await page.getByLabel("Sua senha atual", { exact: true }).fill(firstPassword);
   await page.getByRole("button", { name: "Salvar configuração", exact: true }).click();
   await expect(
-    page.getByText("Configuração salva. Teste o acesso ao modelo.", { exact: true }),
+    page.getByText(
+      "Chave salva com segurança. A configuração está cadastrada; agora você pode testar a conexão.",
+      { exact: true },
+    ),
   ).toBeVisible();
-  await expect(page.getByLabel("Chave da API OpenAI", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Chave da API OpenAI", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Credencial cadastrada", exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Credencial cadastrada", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("Aguardando teste de conexão", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Editar configuração", exact: true }).click();
+  await page.getByLabel("Modelo", { exact: true }).fill("gpt-4.1");
+  await page.getByRole("button", { name: "Cancelar edição", exact: true }).click();
+  await expect(page.getByText("gpt-4.1-mini", { exact: true })).toBeVisible();
   const ai = await (await context.request.get("/api/platform/settings/openai")).json();
   expect(ai.configured).toBe(true);
   expect(JSON.stringify(ai)).not.toContain(key);
-  await page.screenshot({ path: "/workspace/superadmin-configuracao-openai.png", fullPage: true });
+  await page.screenshot({ path: "/workspace/openai-chave-salva-resumo.png", fullPage: true });
+  // Apenas o diagnóstico é simulado; cadastro/reload usam API e SQLite reais.
+  await page.route("**/api/platform/settings/openai/test", (route) =>
+    route.fulfill({
+      json: { ...ai, checked_at: Math.floor(Date.now() / 1000), check_status: "verified" },
+    }),
+  );
+  await page.getByRole("button", { name: "Testar conexão", exact: true }).click();
+  const confirmation = page.getByRole("dialog", { name: "Testar conexão OpenAI", exact: true });
+  await expect(
+    confirmation.getByRole("button", { name: "Confirmar teste", exact: true }),
+  ).toBeDisabled();
+  await confirmation.getByLabel("Sua senha atual", { exact: true }).fill(firstPassword);
+  await confirmation.getByRole("button", { name: "Confirmar teste", exact: true }).click();
+  await expect(page.getByText("Conexão validada", { exact: true })).toBeVisible();
+  await page.screenshot({ path: "/workspace/openai-conexao-validada-resumo.png", fullPage: true });
+  await page.route("**/api/platform/settings/openai/test", (route) =>
+    route.fulfill({
+      json: { ...ai, checked_at: Math.floor(Date.now() / 1000), check_status: "invalid_key" },
+    }),
+  );
+  await page.getByRole("button", { name: "Testar conexão", exact: true }).click();
+  await confirmation.getByLabel("Sua senha atual", { exact: true }).fill(firstPassword);
+  await confirmation.getByRole("button", { name: "Confirmar teste", exact: true }).click();
+  await expect(page.getByText("Verificar conexão", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Chave não aceita pela OpenAI", { exact: true }).first(),
+  ).toBeVisible();
+  await page.unroute("**/api/platform/settings/openai/test");
   await page.getByRole("tab", { name: "Administradores", exact: true }).click();
   await page.getByRole("button", { name: "Novo administrador", exact: true }).click();
   const dialog = page.getByRole("dialog");
@@ -59,8 +102,9 @@ test("configurações: chave write-only, gestão real e primeiro administrador p
   ).toBe(200);
   const secondary = await second.newPage();
   await secondary.goto("/configuracoes");
-  await expect(secondary.getByLabel("Chave da API OpenAI", { exact: true })).toBeEnabled();
-  await secondary.getByLabel("Sua senha atual", { exact: true }).fill(otherPassword);
+  await expect(
+    secondary.getByRole("button", { name: "Editar configuração", exact: true }),
+  ).toBeEnabled();
   await expect(
     secondary.getByRole("button", { name: "Testar conexão", exact: true }),
   ).toBeEnabled();
@@ -121,13 +165,17 @@ test("configurações: chave write-only, gestão real e primeiro administrador p
     ).status(),
   ).toBe(403);
   await page.getByRole("tab", { name: "OpenAI", exact: true }).click();
-  await expect(page.getByText("Chave cadastrada", { exact: true })).toBeVisible();
-  await page.getByLabel("Sua senha atual", { exact: true }).fill(firstPassword);
+  await expect(page.getByText("Chave salva", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Remover chave", exact: true }).click();
+  await page
+    .getByRole("dialog", { name: "Remover chave OpenAI", exact: true })
+    .getByLabel("Sua senha atual", { exact: true })
+    .fill(firstPassword);
   await page.getByRole("button", { name: "Confirmar remoção", exact: true }).click();
   await expect(
     page.getByText("Chave removida do armazenamento da plataforma.", { exact: true }),
   ).toBeVisible();
+  await expect(page.getByLabel("Chave da API OpenAI", { exact: true })).toBeVisible();
 });
 async function secondRequestLogin(context: import("@playwright/test").BrowserContext) {
   // Failed login leaves the current primary session untouched.
