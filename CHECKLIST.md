@@ -79,3 +79,5 @@ Publicação em 10/11/2026: push development concluído nos três repositórios 
 
 ### OpenAI — estado após cadastro
 - [x] Mostrar resumo persistido após salvar/recarregar, separar chave salva de conexão validada/falha, recolher formulário em edição e pedir senha em modal para testar/remover. Build/TypeScript, lint e E2E API/SQLite real aprovados; diagnóstico de provedor simulado apenas no teste visual, sem chamada com chave fictícia. Prints gerados.
+
+Resumo OpenAI publicado: commit 0162414 em origin/development, Railway 12e94097-7213-4332-bb9d-e86a3194e583 em SUCCESS. Credencial existente preservada, sem alteração na API/banco de produção.
