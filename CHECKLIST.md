@@ -84,3 +84,7 @@ Resumo OpenAI publicado: commit 0162414 em origin/development, Railway 12e94097-
 
 ### Consumo de IA
 - [x] Tela integrada com filtros, atualização30s, tokens/cache, gasto USD/subtotal, cobertura e pendências, agrupamento por empresa, chamadas e tarifas paginadas. Cadastro/aplicação de tarifa com confirmação de senha. 27 Vitest, build/TypeScript/lint e E2E API/SQLite reais aprovados; prints desktop/mobile e tarifas gerados. Valores estimados, sem uso externo/fatura/câmbio.
+
+### Publicação do consumo de IA — 13/11/2026
+
+Push confirmado em origin/development: API 6790879 e superadmin 0610d01. Railway API 462d7527-eea2-4967-92fc-c5093a83523c e superadmin d38dd79f-39c0-417c-879d-69e96e54579c em SUCCESS. Readiness PostgreSQL/migrations HTTP 200, login HTTP 200, endpoints de consumo direto e BFF recusam acesso sem sessão com HTTP 401. OpenAPI de produção confirma consulta e tarifas. Consumo autenticado validado anteriormente por E2E com banco temporário; não foi realizada geração paga nesta publicação. Cliente sem mudanças pendentes, já publicado. Valores em USD são estimativas do uso instrumentado pela plataforma.
